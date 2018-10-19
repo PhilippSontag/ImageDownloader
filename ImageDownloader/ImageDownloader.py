@@ -40,7 +40,7 @@ def read_file(file):
 @click.command()
 @click.argument('file')
 @click.option('--save_to', default=os.getcwd(), help='Where to save the images. Default is the current directory.')
-@click.option('--verbose', default=False, type=bool, help='Output warnings and errors for invalid URLs.')
+@click.option('--verbose', default=False, type=bool, help='Output the result for each URL')
 def main(**kwargs):
     """
     Given a plaintext file containing URLs (one per line) this script downloads the images the URLs are pointing
