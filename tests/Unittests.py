@@ -1,8 +1,10 @@
 import os
+
 import pytest
 import requests
+from click.testing import CliRunner
 
-from ImageDownloader.ImageDownloader import download_image, read_file
+from ImageDownloader.ImageDownloader import download_image, read_file, main
 
 WORKING_URL = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Cat03.jpg'
 NOT_WORKING_URL = 'http://www.google.com/nocathere.jpg'
@@ -102,3 +104,34 @@ def test_file_not_found(temp_path, capsys):
 
 # endregion
 
+
+def test_main_with_args(temp_path):
+    save_to = temp_path / 'main_with_args'
+    save_to.mkdir()
+    runner = CliRunner()
+    result = runner.invoke(main, ['data.txt', '-v', '--save_to', save_to])
+    assert result.exit_code == 0
+    assert result.output == '''Success
+Success
+Success
+404 Client Error: Not Found for url: http://www.google.com/nocathere
+Invalid URL 'asdfasfasdf.jpg': No schema supplied. Perhaps you meant http://asdfasfasdf.jpg?
+Success
+Success
+'''
+    expected_images = 5
+    actual_images = len([name for name in os.listdir(save_to) if os.path.isfile(save_to / name)])
+    assert expected_images == actual_images
+
+
+def test_main_without_args():
+    cwd = os.getcwd()
+    runner = CliRunner()
+    result = runner.invoke(main, ['data.txt'])
+    assert result.exit_code == 0
+    expected_images = 5
+    images = [name for name in os.listdir(cwd) if os.path.isfile(os.path.join(cwd, name) and name.endswith('.jpg'))]
+    assert expected_images == len(images)
+    # clean up
+    for i in images:
+        os.remove(os.path.join(cwd, i))
